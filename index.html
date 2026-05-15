@@ -116,6 +116,9 @@ tr:hover td{background:var(--surf2)}
 /* Org table footer */
 tfoot td{padding:9px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;background:var(--green);color:#fff;text-align:right;border-top:2px solid var(--green)}
 tfoot td:first-child{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-family:'DM Sans',sans-serif;font-weight:600}
+tfoot tr:hover td{background:var(--green)!important;color:#fff!important}
+tfoot tr:last-child td{background:#f0f8ec;color:var(--text)}
+tfoot tr:last-child:hover td{background:#e8f5e0!important}
 .org-bar{display:flex;align-items:center;gap:8px}
 .org-bb{width:65px;height:5px;background:var(--bg2);border-radius:3px;flex-shrink:0}
 .org-bf{height:100%;border-radius:3px}
@@ -129,6 +132,16 @@ tfoot td:first-child{text-align:left;font-size:10px;text-transform:uppercase;let
 
 /* Footer */
 .dash-footer{text-align:center;padding:18px 0 6px;border-top:1px solid var(--border);margin-top:4px}
+
+/* Presupuesto */
+.presup-mes-title{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--green);
+  letter-spacing:2px;text-transform:uppercase;padding:4px 12px;background:var(--green3);
+  border-radius:20px;border:1px solid #c8e0bc;display:inline-block;margin-bottom:12px}
+.presup-hist-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+.pct-bar-wrap{width:70px;height:5px;background:var(--bg2);border-radius:3px;display:inline-block;overflow:hidden;vertical-align:middle;margin-right:4px}
+.pct-bar-fill{height:100%;border-radius:3px}
+.pct-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;white-space:nowrap}
+@media(max-width:640px){.presup-hist-grid{grid-template-columns:1fr}}
 
 /* ── MÓVIL MEJORADO ── */
 @media(max-width:640px){
@@ -337,16 +350,133 @@ tfoot td:first-child{text-align:left;font-size:10px;text-transform:uppercase;let
       </div>
     </div>
 
+    <!-- SECCIÓN PRESUPUESTO -->
+    <hr class="sec-divider">
+    <div id="presup-section">
+      <div class="sec-header">
+        <span class="sec-title" style="background:#fff8e6;border-color:#e8d090;color:var(--acc3)">📊 vs Presupuesto</span>
+        <span class="sec-sub" id="presup-sub"></span>
+      </div>
+
+      <!-- Selector de mes -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px" id="presup-mes-btns"></div>
+
+      <!-- Tabla del mes seleccionado -->
+      <div class="card" style="margin-top:12px" id="presup-mes-card">
+        <div id="presup-mes-title" class="presup-mes-title"></div>
+        <div class="tw">
+          <table id="presup-mes-table"></table>
+        </div>
+      </div>
+    </div>
+
     <div class="dash-footer"><span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--muted)">CAFIVER · EXPERTOS EN CAFÉ</span></div>
   </main>
 </div>
 
 <script>
 (function(){
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYi7U_Ven688dtpKln2DNHNIpFIAy4Nufex6POC2xj5pEt-oNJJX619nCVFMrqOsxl/exec';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_ox_VwygJ3nG2UvR-P8fYUHoL8eFJcvG5Urj6JFf3_OIRvLLXay68cAnzHUBwhZTm/exec';
 var MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 var PALETTE = ['#2d5a1b','#5a8c2d','#8c6b2d','#c4714a','#4a7c8c','#7a3fa0','#c4a020','#3b5bdb','#c4364a','#20a090'];
-var ORG_COLORS = {'Anaquel':'#2d5a1b','Coffee Service':'#3b5bdb','Mercado Libre':'#c4a020','Tienda Virtual':'#c4714a','Tienda Tradicional':'#7a3fa0','Nichos':'#c4364a','CAFETERIA':'#5a8c2d','CAFETERIAS NUEVAS':'#4a7c8c','Tik Tok Shop':'#8c6b2d','Northamerican Coffee':'#20a090','La Comercial':'#60a5fa','Soriana':'#f472b6'};
+
+// ── Mapa CANAL SAP → AGRUPACION ──
+var CANAL_AGRUP = {
+  'COAN':'Anaquel',
+  'COSE':'Coffee Service',
+  'COML':'Tienda Virtual',
+  'COTV':'Tienda Virtual',
+  'COTK':'Tienda Virtual',
+  'COCA':'Cafeterias',
+  'COK1':'Cafeterias',
+  'COTT':'Tienda Tradicional',
+  'CONI':'Nichos',
+  'CONC':'Northeamerican',
+  'COLK':'La Comercial',
+  'COSO':'Soriana',
+};
+// ── Mapa LINEA → DESCRIPCION ──
+var LINEA_DESC = {
+  'AS':'Autoservicio','MY':'Mayoreo','CH':'Coffee House',
+  'ML':'Mercado Libre','TV':'Tienda Virtual','TK':'Tik ToK',
+  'NC':'Northeamerican','NI':'Nichos','HT':'Hoteles',
+  'RS':'Restaurantes','OT':'Otros','PL':'Plazas',
+  'CP':'Corporativos','CA':'Cafeterías','UN':'Universidades',
+  'TT':'Tienda Tradicional',
+};
+function getAgrup(ch){ return CANAL_AGRUP[ch] || ch; }
+function getLineaDesc(l){ return LINEA_DESC[l] || l; }
+
+// Presupuesto de un mes específico para una línea
+function getPresupMes(lineaPresup, mesNom) {
+  if(!PRESUPUESTO[lineaPresup]) return null;
+  return PRESUPUESTO[lineaPresup][mesNom] || null;
+}
+
+// Presupuesto acumulado hasta el mes de una fecha YYYY-MM-DD
+function getPresupAcum(lineaPresup, fechaHasta) {
+  if(!PRESUPUESTO[lineaPresup]) return null;
+  var mes = parseInt((fechaHasta||'').substring(5,7)) || 1;
+  var kg=0, ventas=0, uai=0;
+  for(var i=0; i<mes; i++){
+    var p = PRESUPUESTO[lineaPresup][MESES_NOM[i]]||{};
+    kg += p.kg||0; ventas += p.ventas||0; uai += p.uai||0;
+  }
+  return {kg:kg, ventas:ventas, uai:uai};
+}
+
+// Calcula reales de un mes desde porDia
+function getRealMes(mesNom) {
+  var mesIdx = MESES_NOM.indexOf(mesNom);
+  if(mesIdx < 0) return {ventas:0, kg:0};
+  var mesStr = String(mesIdx+1).padStart(2,'0');
+  var ventas=0, kg=0;
+  Object.keys(D.porDia||{}).forEach(function(d){
+    if(d.substring(5,7)===mesStr){ ventas += D.porDia[d]||0; }
+  });
+  // kg por mes no está en porDia — usamos kpisDia del mes activo o kpis global
+  return {ventas:ventas, kg:0};
+}
+function getLineaDesc(l){ return LINEA_DESC[l] || l; }
+
+// ── Mapeo Agrupación → Línea de presupuesto ──
+var AGRUP_PRESUP = {
+  'Anaquel':'Autoservicio','Autoservicio':'Autoservicio','Mayoreo':'Mayoreo',
+  'Coffee Service':'Coffee Service',
+  'Tienda Virtual':'Tienda Virtual',
+  'Cafeterias':'Cafeterias',
+  'Tienda Tradicional':'Tienda Tradicional',
+  'Nichos':'Nichos',
+  'Total':'Total',
+};
+
+// ── Presupuesto anual por línea y mes ──
+var PRESUPUESTO = {"Autoservicio": {"Enero": {"kg": 9440.28, "ventas": 3736343.58, "uai": 389233.28}, "Febrero": {"kg": 6909.1, "ventas": 3063749.57, "uai": 209801.61}, "Marzo": {"kg": 8937.48, "ventas": 3505156.82, "uai": 246100.92}, "Abril": {"kg": 9484.22, "ventas": 3525559.39, "uai": 103356.8}, "Mayo": {"kg": 10526.28, "ventas": 3720860.85, "uai": 99768.89}, "Junio": {"kg": 10568.07, "ventas": 3775247.43, "uai": 23121.9}, "Julio": {"kg": 13420.29, "ventas": 4231967.39, "uai": 82446.16}, "Agosto": {"kg": 12396.78, "ventas": 4167514.76, "uai": 1733.14}, "Septiembre": {"kg": 12560.51, "ventas": 4202857.92, "uai": 64718.1}, "Octubre": {"kg": 13797.93, "ventas": 4518586.25, "uai": 67706.26}, "Noviembre": {"kg": 12427.88, "ventas": 4141751.1, "uai": 43311.28}, "Diciembre": {"kg": 12266.95, "ventas": 4088408.43, "uai": 29637.74}}, "Cafeterias": {"Enero": {"kg": 2537.43, "ventas": 2086800.55, "uai": 484544.7}, "Febrero": {"kg": 2089.12, "ventas": 1769912.69, "uai": 317778.72}, "Marzo": {"kg": 2457.57, "ventas": 2074585.93, "uai": 407195.75}, "Abril": {"kg": 2308.95, "ventas": 2008570.55, "uai": 417044.77}, "Mayo": {"kg": 2564.28, "ventas": 2165988.07, "uai": 426566.54}, "Junio": {"kg": 2399.3, "ventas": 2028546.21, "uai": 400456.9}, "Julio": {"kg": 2753.27, "ventas": 2326422.86, "uai": 566637.08}, "Agosto": {"kg": 2825.62, "ventas": 2382565.69, "uai": 574041.96}, "Septiembre": {"kg": 2240.18, "ventas": 1893433.41, "uai": 331104.18}, "Octubre": {"kg": 2220.42, "ventas": 1878688.86, "uai": 323252.91}, "Noviembre": {"kg": 2567.59, "ventas": 2173556.17, "uai": 479605.47}, "Diciembre": {"kg": 2826.35, "ventas": 2384411.38, "uai": 587435.67}}, "Coffee Service": {"Enero": {"kg": 89030.07, "ventas": 28726250.6, "uai": 466060.16}, "Febrero": {"kg": 85664.66, "ventas": 28136669.72, "uai": 458637.02}, "Marzo": {"kg": 95445.94, "ventas": 29220889.23, "uai": 733492.71}, "Abril": {"kg": 87589.76, "ventas": 30584600.15, "uai": 885679.45}, "Mayo": {"kg": 88073.02, "ventas": 32282760.17, "uai": 1456545.57}, "Junio": {"kg": 87147.73, "ventas": 33780237.84, "uai": 2090455.63}, "Julio": {"kg": 85304.5, "ventas": 33118262.94, "uai": 1963499.15}, "Agosto": {"kg": 94201.94, "ventas": 33809576.61, "uai": 2154921.47}, "Septiembre": {"kg": 88386.73, "ventas": 32746743.9, "uai": 1492561.91}, "Octubre": {"kg": 94422.84, "ventas": 35635622.49, "uai": 2747635.15}, "Noviembre": {"kg": 96383.67, "ventas": 38523678.3, "uai": 3681995.84}, "Diciembre": {"kg": 109066.99, "ventas": 39439720.75, "uai": 3999661.99}}, "Mayoreo": {"Enero": {"kg": 3977.63, "ventas": 1764494.57, "uai": 67179.09}, "Febrero": {"kg": 3885.16, "ventas": 1354294.84, "uai": 60866.34}, "Marzo": {"kg": 4393.42, "ventas": 1729171.95, "uai": 17525.04}, "Abril": {"kg": 5131.17, "ventas": 2045011.6, "uai": 44058.78}, "Mayo": {"kg": 5220.19, "ventas": 2129783.46, "uai": 171863.42}, "Junio": {"kg": 5907.79, "ventas": 2278948.19, "uai": 123707.97}, "Julio": {"kg": 6537.41, "ventas": 2639312.99, "uai": 288047.83}, "Agosto": {"kg": 6433.52, "ventas": 2629731.34, "uai": 285678.55}, "Septiembre": {"kg": 7543.97, "ventas": 3069789.72, "uai": 346886.03}, "Octubre": {"kg": 6779.49, "ventas": 2772251.24, "uai": 319379.87}, "Noviembre": {"kg": 7263.95, "ventas": 2935769.86, "uai": 327398.09}, "Diciembre": {"kg": 5489.32, "ventas": 2321128.95, "uai": 222863.93}}, "Nichos": {"Enero": {"kg": 88815.0, "ventas": 19928039.0, "uai": 3835706.65}, "Febrero": {"kg": 82018.0, "ventas": 21982534.0, "uai": 4483773.94}, "Marzo": {"kg": 69744.0, "ventas": 19336745.0, "uai": 4101283.25}, "Abril": {"kg": 57099.0, "ventas": 15562055.0, "uai": 3043551.74}, "Mayo": {"kg": 67047.0, "ventas": 19389594.0, "uai": 4045912.07}, "Junio": {"kg": 56286.0, "ventas": 16182114.0, "uai": 3101674.82}, "Julio": {"kg": 58120.0, "ventas": 17392960.0, "uai": 3618594.01}, "Agosto": {"kg": 94803.0, "ventas": 27240041.0, "uai": 5962197.71}, "Septiembre": {"kg": 110205.0, "ventas": 36913897.0, "uai": 8265989.26}, "Octubre": {"kg": 76015.0, "ventas": 21547553.0, "uai": 4495117.06}, "Noviembre": {"kg": 76015.0, "ventas": 21547550.0, "uai": 4511779.14}, "Diciembre": {"kg": 76016.0, "ventas": 21547550.0, "uai": 4516624.14}}, "Tienda Tradicional": {"Enero": {"kg": 5194.99, "ventas": 2218056.22, "uai": 34183.19}, "Febrero": {"kg": 4074.84, "ventas": 1961079.92, "uai": 991.54}, "Marzo": {"kg": 4789.21, "ventas": 1949515.02, "uai": 22840.53}, "Abril": {"kg": 4494.76, "ventas": 1847089.86, "uai": 10562.14}, "Mayo": {"kg": 4829.57, "ventas": 2065707.39, "uai": 52916.74}, "Junio": {"kg": 5177.35, "ventas": 2218195.03, "uai": 101561.38}, "Julio": {"kg": 5860.67, "ventas": 2587939.78, "uai": 207043.15}, "Agosto": {"kg": 5888.11, "ventas": 2600985.48, "uai": 156595.56}, "Septiembre": {"kg": 5983.97, "ventas": 2596128.59, "uai": 128028.36}, "Octubre": {"kg": 6078.25, "ventas": 2663201.44, "uai": 147215.12}, "Noviembre": {"kg": 6234.65, "ventas": 2525225.95, "uai": 155677.53}, "Diciembre": {"kg": 6336.56, "ventas": 2770269.87, "uai": 227676.42}}, "Tienda Virtual": {"Enero": {"kg": 2261.0, "ventas": 883655.0, "uai": 105058.86}, "Febrero": {"kg": 2102.0, "ventas": 805845.0, "uai": 105543.01}, "Marzo": {"kg": 2541.0, "ventas": 988555.0, "uai": 142023.8}, "Abril": {"kg": 8950.0, "ventas": 2547737.0, "uai": 551658.35}, "Mayo": {"kg": 10975.0, "ventas": 2983739.0, "uai": 686981.26}, "Junio": {"kg": 8897.0, "ventas": 2681991.0, "uai": 564832.73}, "Julio": {"kg": 12050.0, "ventas": 3259041.0, "uai": 724166.04}, "Agosto": {"kg": 8165.0, "ventas": 2527017.0, "uai": 566251.33}, "Septiembre": {"kg": 9922.0, "ventas": 3181946.0, "uai": 739375.11}, "Octubre": {"kg": 7318.0, "ventas": 2206614.0, "uai": 469222.83}, "Noviembre": {"kg": 7318.0, "ventas": 2206614.0, "uai": 469222.83}, "Diciembre": {"kg": 7318.0, "ventas": 2206614.0, "uai": 471800.83}}, "Total": {"Enero": {"kg": 201256.39, "ventas": 59343639.52, "uai": 5381965.94}, "Febrero": {"kg": 186742.88, "ventas": 59074085.74, "uai": 5637392.17}, "Marzo": {"kg": 188308.62, "ventas": 58804618.95, "uai": 5670461.99}, "Abril": {"kg": 175057.85, "ventas": 58120623.56, "uai": 5055912.04}, "Mayo": {"kg": 189235.35, "ventas": 64738432.95, "uai": 6940554.5}, "Junio": {"kg": 176383.24, "ventas": 62945279.69, "uai": 6405811.33}, "Julio": {"kg": 184046.14, "ventas": 65555906.96, "uai": 7450433.41}, "Agosto": {"kg": 224713.97, "ventas": 75357431.88, "uai": 9701419.73}, "Septiembre": {"kg": 236842.36, "ventas": 84604796.54, "uai": 11368662.96}, "Octubre": {"kg": 206631.92, "ventas": 71222517.28, "uai": 8569529.21}, "Noviembre": {"kg": 208210.73, "ventas": 74054145.38, "uai": 9668990.18}, "Diciembre": {"kg": 219320.16, "ventas": 74758103.39, "uai": 10055700.71}}};
+
+var MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                 'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// Calcula presupuesto acumulado hasta el mes de una fecha YYYY-MM-DD
+function getPresupAcum(lineaPresup, fechaHasta) {
+  if(!PRESUPUESTO[lineaPresup]) return null;
+  var mes = parseInt((fechaHasta||'').substring(5,7)) || 1; // mes 1-12
+  var kg=0, ventas=0, uai=0;
+  for(var i=0; i<mes; i++){
+    var m = MESES_NOM[i];
+    var p = PRESUPUESTO[lineaPresup][m]||{};
+    kg     += p.kg||0;
+    ventas += p.ventas||0;
+    uai    += p.uai||0;
+  }
+  return {kg: kg, ventas: ventas, uai: uai};
+}
+var ORG_COLORS = {
+  'Anaquel':'#2d5a1b','Coffee Service':'#3b5bdb',
+  'Tienda Virtual':'#c4714a','Cafeterias':'#5a8c2d',
+  'Tienda Tradicional':'#7a3fa0','Nichos':'#c4364a',
+  'Mayoreo':'#c4a020','Northeamerican':'#20a090',
+  'La Comercial':'#60a5fa','Soriana':'#f472b6',
+};
 var fmt    = function(n){return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);};
 var fmtUSD = function(n){return new Intl.NumberFormat('es-MX',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);};
 var fmtN   = function(n){return n.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});};
@@ -453,6 +583,7 @@ function initDashboard(){
 
   populateFilters();
   applyFilters();
+  renderPresupuesto();
 
   // Mobile toggle
   var btn=$('btn-filter-toggle'), panel=$('h-right-panel');
@@ -560,8 +691,8 @@ function renderDay(){
     $('dk-kilos').textContent  = fmtN(kd.kilos||0)+' kg';
     var orgMXN = !ch ? D.orgMXN : calcOrg(fecha, false, ch);
     var orgUSD = !ch ? D.orgUSD : calcOrg(fecha, true, ch);
-    renderOrgTable('org-mxn-body','org-mxn-foot', orgMXN, fmt);
-    renderOrgTable('org-usd-body','org-usd-foot', orgUSD, fmtUSD);
+    renderOrgTable('org-mxn-body','org-mxn-foot', orgMXN, fmt, fecha);
+    renderOrgTable('org-usd-body','org-usd-foot', orgUSD, fmtUSD, fecha);
     renderCanalChart(orgMXN, orgUSD);
     renderLineas(fecha, ch);
   } else {
@@ -577,8 +708,8 @@ function renderDay(){
       $('dk-cli').textContent    = (kd.clientes||0).toLocaleString('es-MX');
       $('dk-ticket').textContent = kd.facturas ? fmt(kd.total/kd.facturas) : '—';
       $('dk-kilos').textContent  = fmtN(kd.kilos||0)+' kg';
-      renderOrgTable('org-mxn-body','org-mxn-foot', dd.orgMXN, fmt);
-      renderOrgTable('org-usd-body','org-usd-foot', dd.orgUSD, fmtUSD);
+      renderOrgTable('org-mxn-body','org-mxn-foot', dd.orgMXN, fmt, fecha);
+      renderOrgTable('org-usd-body','org-usd-foot', dd.orgUSD, fmtUSD, fecha);
       renderCanalChart(dd.orgMXN, dd.orgUSD);
     } else {
       // Día muy antiguo: solo total
@@ -602,36 +733,116 @@ function renderDay(){
 }
 
 // ── ORG TABLE ──
-function renderOrgTable(bodyId, footId, org, fmtFn){
+function renderOrgTable(bodyId, footId, org, fmtFn, fecha){
+  var isUSD = fmtFn === fmtUSD;
   var rows = ((org&&org.rows)||[]).filter(function(e){ return e.org !== 'Northamerican Coffee'; });
   if(!rows.length){
-    $(bodyId).innerHTML='<tr><td colspan="5" class="no-data">Sin registros</td></tr>';
+    // Ocultar card USD completa si no hay datos
+    var card = $(bodyId) && $(bodyId).closest ? $(bodyId).closest('.card') : null;
+    if(!card){ var el=$(bodyId); while(el&&!el.classList.contains('card'))el=el.parentElement; card=el; }
+    if(card && isUSD) card.style.display='none';
+    else $(bodyId).innerHTML='<tr><td colspan="5" class="no-data">Sin registros</td></tr>';
     $(footId).innerHTML=''; return;
   }
+  // Si hay datos, mostrar la card
+  if(isUSD){
+    var card2 = $(bodyId); while(card2&&!card2.classList.contains('card'))card2=card2.parentElement;
+    if(card2) card2.style.display='';
+  }
   $(bodyId).innerHTML = rows.map(function(e){
-    var color = ORG_COLORS[e.org]||'#8c6b2d';
+    var agrup = getAgrup(e.org);
+    var color = ORG_COLORS[agrup]||ORG_COLORS[e.org]||'#8c6b2d';
     var pct   = (e.pct||0).toFixed(1);
-    return '<tr><td style="font-weight:600;color:var(--text)">'+e.org+'</td>'+
+    // vs presupuesto solo para MXN
+    var presupStr = '';
+    if(!isUSD){
+      var lp = AGRUP_PRESUP[agrup];
+      var fechaRef = fecha || D.diaActivo;
+      var p = lp ? getPresupAcum(lp, fechaRef) : null;
+      if(p && p.ventas > 0){
+        var cumpl = (e.netwr / p.ventas * 100).toFixed(1);
+        var color2 = parseFloat(cumpl)>=100?'#2d5a1b':parseFloat(cumpl)>=80?'#c4714a':'#c4364a';
+        presupStr = ' <span style="font-size:9px;padding:1px 5px;border-radius:8px;background:'+color2+'22;color:'+color2+';font-weight:700">'+cumpl+'%▶</span>';
+      }
+    }
+    return '<tr><td style="font-weight:600;color:var(--text)">'+agrup+presupStr+'</td>'+
       '<td class="num" style="color:var(--muted)">'+(e.kilos>0?fmtN(e.kilos):'—')+'</td>'+
       '<td class="num" style="color:var(--green);font-weight:600">'+fmtFn(e.netwr)+'</td>'+
       '<td class="num" style="color:var(--muted)">'+e.facts+'</td>'+
       '<td><div class="org-bar"><div class="org-bb"><div class="org-bf" style="width:'+pct+'%;background:'+color+'"></div></div>'+
       '<span class="num" style="color:'+color+';min-width:34px">'+pct+'%</span></div></td></tr>';
   }).join('');
-  $(footId).innerHTML='<tr><td>Total</td><td>'+(org.totalKilos>0?fmtN(org.totalKilos):'—')+'</td><td>'+fmtFn(org.total||0)+'</td><td>'+(org.totalFacts||0)+'</td><td></td></tr>';
+
+  // Fila total
+  var totalHtml = '<tr><td>Total</td><td>'+(org.totalKilos>0?fmtN(org.totalKilos):'—')+'</td><td>'+fmtFn(org.total||0)+'</td><td>'+(org.totalFacts||0)+'</td><td></td></tr>';
+
+  // Fila vs Presupuesto — usa el mes del día mostrado (no acumulado)
+  if(!isUSD && D.realPorMes){
+    // Obtener mes del día mostrado
+    var fechaRef  = fecha || D.diaActivo || '';
+    var mesIdx    = parseInt(fechaRef.substring(5,7))-1;
+    var mesNom    = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][mesIdx];
+    var pMes      = PRESUPUESTO['Total'] && PRESUPUESTO['Total'][mesNom];
+    var realMes   = D.realPorMes[mesNom] && D.realPorMes[mesNom]['Total'];
+
+    if(pMes && realMes){
+      var rV  = realMes.ventas||0;
+      var rK  = realMes.kg||0;
+      var cumplV = pMes.ventas>0 ? (rV/pMes.ventas*100) : 0;
+      var cumplK = pMes.kg>0     ? (rK/pMes.kg*100)     : 0;
+      var cc  = cumplV>=100?'#2d5a1b':cumplV>=80?'#c4714a':'#c4364a';
+      var ck  = cumplK>=100?'#2d5a1b':cumplK>=80?'#c4714a':'#c4364a';
+      // Barra de progreso visual
+      var barW = Math.min(cumplV,100).toFixed(0);
+      totalHtml +=
+        '<tr style="background:linear-gradient(135deg,#edf5e7,#f5f9f2);border-top:2px solid #b8dba8">'+
+        '<td style="padding:10px 12px;font-weight:700;font-size:11px;color:var(--green);letter-spacing:1px;text-transform:uppercase;white-space:nowrap">'+
+          '📊 '+mesNom+' vs Presupuesto</td>'+
+        // KG
+        '<td class="num" style="padding:10px 8px">'+
+          '<div style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:'+ck+'">'+cumplK.toFixed(1)+'%</div>'+
+          '<div style="font-size:10px;color:var(--muted)">'+fmtN(rK)+' / '+fmtN(pMes.kg)+'</div>'+
+        '</td>'+
+        // Ventas
+        '<td class="num" style="padding:10px 8px" colspan="2">'+
+          '<div style="display:flex;align-items:center;gap:8px;justify-content:flex-end">'+
+            '<div>'+
+              '<div style="font-family:\'JetBrains Mono\',monospace;font-size:15px;font-weight:700;color:'+cc+'">'+cumplV.toFixed(1)+'%</div>'+
+              '<div style="font-size:10px;color:var(--muted)">'+fmt(rV)+' de '+fmt(pMes.ventas)+'</div>'+
+            '</div>'+
+            '<div style="width:80px;height:10px;background:var(--bg2);border-radius:5px;overflow:hidden;flex-shrink:0">'+
+              '<div style="width:'+barW+'%;height:100%;background:'+cc+';border-radius:5px;transition:width .5s"></div>'+
+            '</div>'+
+          '</div>'+
+        '</td>'+
+        // UAI
+        '<td class="num" style="padding:10px 8px">'+
+          '<div style="font-size:11px;color:var(--muted)">'+fmt(pMes.uai)+'</div>'+
+          '<div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">UAI Presup.</div>'+
+        '</td>'+
+        '</tr>';
+    }
+  }
+  $(footId).innerHTML = totalHtml;
 }
 
 // ── GRÁFICA CANAL ──
 function renderCanalChart(orgMXN, orgUSD){
   var labels=[], dataMXN=[], dataUSD=[], totalMXN=0, totalUSD=0;
   var all = {};
-  ((orgMXN&&orgMXN.rows)||[]).forEach(function(r){all[r.org]={mxn:r.netwr,usd:0};totalMXN+=r.netwr;});
-  ((orgUSD&&orgUSD.rows)||[]).forEach(function(r){
-    if(all[r.org]) all[r.org].usd=r.netwr; else all[r.org]={mxn:0,usd:r.netwr};
-    totalUSD+=r.netwr;
+  ((orgMXN&&orgMXN.rows)||[]).forEach(function(r){
+    var k=getAgrup(r.org);
+    if(k==='Northeamerican') return; // excluir
+    if(!all[k])all[k]={mxn:0,usd:0};
+    all[k].mxn+=r.netwr; totalMXN+=r.netwr;
   });
-  // Excluir Northamerican Coffee de la gráfica de canales
-  delete all['Northamerican Coffee'];
+  ((orgUSD&&orgUSD.rows)||[]).forEach(function(r){
+    var k=getAgrup(r.org);
+    if(k==='Northeamerican') return;
+    if(!all[k])all[k]={mxn:0,usd:0};
+    all[k].usd+=r.netwr; totalUSD+=r.netwr;
+  });
   labels = Object.keys(all).sort(function(a,b){return (all[b].mxn+all[b].usd)-(all[a].mxn+all[a].usd);});
   dataMXN = labels.map(function(k){return all[k].mxn;});
   dataUSD = labels.map(function(k){return all[k].usd;});
@@ -811,6 +1022,108 @@ function calcKPIsPeriodo(ch, mon){
   }
   return{total:kpis.total||0,kilos:kpis.kilos||0,lineas:kpis.lineas||0,facturas:kpis.facturas||0,clientes:kpis.clientes||0,dias:(D.allDates||[]).length};
 }
+
+
+  // ── PRESUPUESTO vs REAL ──────────────────────────────────────
+  var presupMesActivo = null;
+
+  function renderPresupuesto(){
+    if(!D || !D.realPorMes) return;
+
+    var LINEAS    = ['Autoservicio','Cafeterias','Coffee Service','Mayoreo',
+                     'Nichos','Tienda Tradicional','Tienda Virtual','Total'];
+    var MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+    function pcColor(v){ return v>=100?'#2d5a1b':v>=80?'#c4714a':'#c4364a'; }
+    function pcBadge(real, presup, big){
+      if(!presup) return '<span style="color:var(--muted)">—</span>';
+      var v=real/presup*100, c=pcColor(v);
+      return '<span style="font-family:\'JetBrains Mono\',monospace;font-size:'+(big?'13':'11')+'px;font-weight:700;color:'+c+'">'+v.toFixed(1)+'%</span>';
+    }
+
+    var THEAD = '<thead><tr>'+
+      '<th style="min-width:140px">Línea</th>'+
+      '<th style="text-align:right">KG Real</th>'+
+      '<th style="text-align:right">KG Presup.</th>'+
+      '<th style="text-align:right">% KG</th>'+
+      '<th style="text-align:right">Ventas Real</th>'+
+      '<th style="text-align:right">Ventas Presup.</th>'+
+      '<th style="text-align:right">% Ventas</th>'+
+      '<th style="text-align:right">UAI Presup.</th>'+
+    '</tr></thead>';
+
+    function buildRows(mesNom){
+      var real = D.realPorMes[mesNom] || {};
+      var rows = '';
+      LINEAS.forEach(function(linea){
+        var pm  = PRESUPUESTO[linea] && PRESUPUESTO[linea][mesNom];
+        if(!pm) return;
+        var rV  = real[linea] ? real[linea].ventas||0 : 0;
+        var rK  = real[linea] ? real[linea].kg||0     : 0;
+        var isT = linea==='Total';
+        var bg  = isT ? 'background:var(--green)' : '';
+        var tc  = isT ? '#fff' : 'var(--green)';
+        var mc  = isT ? '#d0ecc8' : 'var(--muted)';
+        rows += '<tr style="'+bg+(isT?'':';border-bottom:1px solid var(--bg2)')+'">'+
+          '<td style="padding:7px 10px;font-weight:'+(isT?700:600)+';color:'+(isT?'#fff':'var(--text)')+'">'+linea+'</td>'+
+          '<td class="num" style="color:'+tc+';font-weight:'+(isT?700:400)+'">'+fmtN(rK)+'</td>'+
+          '<td class="num" style="color:'+mc+'">'+fmtN(pm.kg)+'</td>'+
+          '<td style="text-align:right;padding:7px 10px">'+pcBadge(rK,pm.kg,isT)+'</td>'+
+          '<td class="num" style="color:'+tc+';font-weight:'+(isT?700:600)+'">'+fmt(rV)+'</td>'+
+          '<td class="num" style="color:'+mc+'">'+fmt(pm.ventas)+'</td>'+
+          '<td style="text-align:right;padding:7px 10px">'+pcBadge(rV,pm.ventas,isT)+'</td>'+
+          '<td class="num" style="color:'+mc+'">'+fmt(pm.uai)+'</td>'+
+        '</tr>';
+      });
+      return rows;
+    }
+
+    function showMes(mesNom){
+      presupMesActivo = mesNom;
+      var hoy = new Date();
+
+      // Actualizar botones
+      var btns = $('presup-mes-btns').querySelectorAll('button');
+      btns.forEach(function(b){
+        var isAct = b.dataset.mes === mesNom;
+        b.style.background    = isAct ? 'var(--green)' : 'var(--surf2)';
+        b.style.color         = isAct ? '#fff' : 'var(--text2)';
+        b.style.borderColor   = isAct ? 'var(--green)' : 'var(--border)';
+        b.style.fontWeight    = isAct ? '700' : '400';
+      });
+
+      // Título
+      var isCurrent = MESES_NOM[hoy.getMonth()] === mesNom;
+      $('presup-mes-title').textContent = mesNom + ' ' + hoy.getFullYear() +
+        (isCurrent ? '  —  Mes en curso' : '  —  Mes cerrado');
+
+      // Tabla
+      $('presup-mes-table').innerHTML = THEAD + '<tbody>' + buildRows(mesNom) + '</tbody>';
+    }
+
+    // Construir botones de meses disponibles
+    var hoy       = new Date();
+    var mesActIdx = hoy.getMonth();
+    var btnsHtml  = '';
+    for(var m=0; m<=mesActIdx; m++){
+      var mn = MESES_NOM[m];
+      if(!D.realPorMes[mn] && m < mesActIdx) continue; // saltar meses sin datos excepto el actual
+      btnsHtml += '<button data-mes="'+mn+'" onclick="window.__showPresupMes(\''+mn+'\')" style="'+
+        'background:var(--surf2);border:1px solid var(--border);color:var(--text2);'+
+        'border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;'+
+        'font-family:\'DM Sans\',sans-serif;transition:all .15s">'+mn+'</button>';
+    }
+    $('presup-mes-btns').innerHTML = btnsHtml;
+
+    // Función global para onclick
+    window.__showPresupMes = showMes;
+
+    // Mostrar mes actual por defecto
+    showMes(MESES_NOM[mesActIdx]);
+  }
+
+
 
 function mkChart(id,cfg){if(charts[id]){charts[id].destroy();delete charts[id];}charts[id]=new Chart(document.getElementById(id).getContext('2d'),cfg);}
 
