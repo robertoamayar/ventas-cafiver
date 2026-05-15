@@ -302,14 +302,15 @@ var filteredDates = [];
 
 // ── CARGA ──
 setBar(10,'Conectando con servidor...');
-fetch(APPS_https://script.google.com/macros/s/AKfycbz6wCcRZ1yESn06ITucSLXuTFjg8-ybvfjrBMUjWUWGhFp5lAoNtpLNNBRL2RcSfGMB/exec)
+fetch(APPS_SCRIPT_URL, {redirect:'follow'})
   .then(function(r){
     if(!r.ok) throw new Error('HTTP '+r.status);
     setBar(50,'Recibiendo datos...');
-    return r.json();
+    return r.text();
   })
-  .then(function(json){
-    setBar(85,'Preparando dashboard...');
+  .then(function(txt){
+    setBar(80,'Procesando datos...');
+    var json = JSON.parse(txt);
     D = json;
     setTimeout(initDashboard, 80);
   })
