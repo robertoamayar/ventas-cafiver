@@ -545,31 +545,54 @@ function renderDay(){
   $('org-mxn-date').textContent   = fmtDate(fecha);
   $('org-usd-date').textContent   = fmtDate(fecha);
 
-  // Si el día activo es el que tiene los datos pre-calculados
   var esDiaActivo = fecha === D.diaActivo;
   var ch = $('sel-channel').value;
 
-  // KPIs del día
-  var kd = esDiaActivo && !ch ? D.kpisDia : calcKPIsDia(fecha, ch);
-  $('dk-total').textContent  = fmt(kd.total||0);
-  $('dk-total-s').textContent= (kd.lineas||0)+' líneas';
-  $('dk-fact').textContent   = (kd.facturas||0).toLocaleString('es-MX');
-  $('dk-fact-s').textContent = (kd.clientes||0)+' clientes';
-  $('dk-cli').textContent    = (kd.clientes||0).toLocaleString('es-MX');
-  $('dk-ticket').textContent = kd.facturas ? fmt(kd.total/kd.facturas) : '—';
-  $('dk-kilos').textContent  = fmtN(kd.kilos||0)+' kg';
-
-  // Tablas org
-  var orgMXN = esDiaActivo && !ch ? D.orgMXN : calcOrg(fecha, false, ch);
-  var orgUSD = esDiaActivo && !ch ? D.orgUSD : calcOrg(fecha, true, ch);
-  renderOrgTable('org-mxn-body','org-mxn-foot', orgMXN, fmt);
-  renderOrgTable('org-usd-body','org-usd-foot', orgUSD, fmtUSD);
-
-  // Gráfica canal
-  renderCanalChart(orgMXN, orgUSD);
-
-  // Líneas detalle
-  renderLineas(fecha, ch);
+  if(esDiaActivo){
+    // ── Día activo: datos completos pre-calculados ──
+    var kd = !ch ? D.kpisDia : calcKPIsDia(fecha, ch);
+    $('dk-total').textContent  = fmt(kd.total||0);
+    $('dk-total-s').textContent= (kd.lineas||0)+' líneas';
+    $('dk-fact').textContent   = (kd.facturas||0).toLocaleString('es-MX');
+    $('dk-fact-s').textContent = (kd.clientes||0)+' clientes';
+    $('dk-cli').textContent    = (kd.clientes||0).toLocaleString('es-MX');
+    $('dk-ticket').textContent = kd.facturas ? fmt(kd.total/kd.facturas) : '—';
+    $('dk-kilos').textContent  = fmtN(kd.kilos||0)+' kg';
+    var orgMXN = !ch ? D.orgMXN : calcOrg(fecha, false, ch);
+    var orgUSD = !ch ? D.orgUSD : calcOrg(fecha, true, ch);
+    renderOrgTable('org-mxn-body','org-mxn-foot', orgMXN, fmt);
+    renderOrgTable('org-usd-body','org-usd-foot', orgUSD, fmtUSD);
+    renderCanalChart(orgMXN, orgUSD);
+    renderLineas(fecha, ch);
+  } else {
+    // ── Día histórico: solo tenemos el total de porDia ──
+    var totalDia = (D.porDia && D.porDia[fecha]) || 0;
+    $('dk-total').textContent  = fmt(totalDia);
+    $('dk-total-s').textContent= 'Total del día';
+    $('dk-fact').textContent   = '—';
+    $('dk-fact-s').textContent = '';
+    $('dk-cli').textContent    = '—';
+    $('dk-ticket').textContent = '—';
+    $('dk-kilos').textContent  = '—';
+    var msg = '<tr><td colspan="5" class="no-data" style="padding:28px;font-size:12px">'+
+      'Detalle disponible solo para el día más reciente<br>'+
+      '<span style="color:var(--green);font-weight:600">('+fmtDate(D.diaActivo)+')</span><br>'+
+      '<span style="font-size:11px;color:var(--muted)">Total del día: '+fmt(totalDia)+'</span>'+
+      '</td></tr>';
+    $('org-mxn-body').innerHTML = msg;
+    $('org-usd-body').innerHTML = msg;
+    $('org-mxn-foot').innerHTML = '';
+    $('org-usd-foot').innerHTML = '';
+    // Gráfica vacía
+    $('chart-mxn-total').textContent = fmt(totalDia);
+    $('chart-usd-total').textContent = '— USD';
+    if(charts['chart-day-canal']){charts['chart-day-canal'].destroy();delete charts['chart-day-canal'];}
+    // Líneas
+    var hint = $('day-lines-hint');
+    if(hint) hint.style.display='none';
+    $('day-lines-count').textContent='';
+    $('tbl-lines').innerHTML='<tr><td colspan="9" class="no-data">Detalle de líneas solo disponible para '+fmtDate(D.diaActivo)+'</td></tr>';
+  }
 }
 
 // ── ORG TABLE ──
