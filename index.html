@@ -303,41 +303,78 @@ var filteredDates = [];
 // ── CARGA ──
 setBar(10,'Conectando con servidor...');
 
-// JSONP — evita bloqueo CORS de Apps Script
-function cargarConJSONP() {
+function cargarDatos() {
+  // Intento 1: JSONP con script tag (evita CORS)
   var callbackName = 'cafiver_cb_' + Date.now();
   var script = document.createElement('script');
-  var timeout = setTimeout(function(){
-    cleanup();
-    $('ld-error').textContent = 'Tiempo de espera agotado. Verifica tu conexión.';
-    setBar(0,'Error de conexión');
-  }, 30000);
+  var done = false;
 
-  function cleanup(){
-    clearTimeout(timeout);
-    delete window[callbackName];
+  var timeout = setTimeout(function(){
+    if(done) return;
+    done = true;
     if(script.parentNode) script.parentNode.removeChild(script);
-  }
+    delete window[callbackName];
+    // Intento 2: iframe + postMessage
+    cargarConIframe();
+  }, 10000);
 
   window[callbackName] = function(json){
-    cleanup();
+    if(done) return;
+    done = true;
+    clearTimeout(timeout);
+    if(script.parentNode) script.parentNode.removeChild(script);
+    delete window[callbackName];
     setBar(85,'Preparando dashboard...');
     D = json;
     setTimeout(initDashboard, 80);
   };
 
-  script.onerror = function(){
-    cleanup();
-    $('ld-error').textContent = 'Error al cargar datos. Verifica tu conexión.';
-    setBar(0,'Error de conexión');
-  };
-
-  setBar(30,'Descargando datos...');
+  setBar(25,'Descargando datos...');
   script.src = APPS_SCRIPT_URL + '?callback=' + callbackName;
+  script.onerror = function(){
+    if(done) return;
+    done = true;
+    clearTimeout(timeout);
+    delete window[callbackName];
+    cargarConIframe();
+  };
   document.head.appendChild(script);
 }
 
-cargarConJSONP();
+function cargarConIframe() {
+  setBar(40,'Cargando via iframe...');
+  var iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  var done = false;
+
+  var timeout = setTimeout(function(){
+    if(done) return; done = true;
+    document.body.removeChild(iframe);
+    $('ld-error').innerHTML = 'No se pudo conectar automáticamente.<br>Por favor recarga la página o contacta soporte.';
+    setBar(0,'');
+  }, 20000);
+
+  window.addEventListener('message', function handler(e){
+    if(done) return;
+    try {
+      var json = JSON.parse(e.data);
+      if(json && json.totalRows) {
+        done = true;
+        clearTimeout(timeout);
+        window.removeEventListener('message', handler);
+        document.body.removeChild(iframe);
+        setBar(85,'Preparando dashboard...');
+        D = json;
+        setTimeout(initDashboard, 80);
+      }
+    } catch(err){}
+  });
+
+  document.body.appendChild(iframe);
+  iframe.src = APPS_SCRIPT_URL;
+}
+
+cargarDatos();
 
 // ── INIT ──
 function initDashboard(){
