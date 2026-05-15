@@ -511,22 +511,9 @@ function applyFilters(){
     return true;
   });
 
-  // Día activo = siempre ayer (día anterior a hoy)
+  // Día activo = D.diaActivo (el Apps Script ya calcula el último día hábil)
   if(filteredDates.length){
-    // Calcular ayer
-    var hoy = new Date();
-    var ayer = new Date(hoy); ayer.setDate(hoy.getDate()-1);
-    var ayerStr = ayer.getFullYear()+'-'+
-      String(ayer.getMonth()+1).padStart(2,'0')+'-'+
-      String(ayer.getDate()).padStart(2,'0');
-    // Buscar ayer en filteredDates; si no existe, tomar el más cercano anterior
-    var idx = filteredDates.indexOf(ayerStr);
-    if(idx < 0){
-      // Buscar el último día <= ayer
-      for(var i=filteredDates.length-1;i>=0;i--){
-        if(filteredDates[i]<=ayerStr){idx=i;break;}
-      }
-    }
+    var idx = filteredDates.indexOf(D.diaActivo);
     activeDayIdx = idx>=0 ? idx : filteredDates.length-1;
   }
 
