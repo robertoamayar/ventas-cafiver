@@ -129,6 +129,67 @@ tfoot td:first-child{text-align:left;font-size:10px;text-transform:uppercase;let
 
 /* Footer */
 .dash-footer{text-align:center;padding:18px 0 6px;border-top:1px solid var(--border);margin-top:4px}
+
+/* ── MÓVIL MEJORADO ── */
+@media(max-width:640px){
+  /* Header compacto */
+  header{padding:8px 12px;min-height:52px;gap:6px}
+  .h-logo{width:36px;height:36px}
+  .h-title{font-size:12px;letter-spacing:1px}
+  .h-badge{font-size:9px;padding:1px 8px}
+  .h-update{display:none}
+  .h-right{display:none;flex-direction:column;width:100%;padding:8px 0 4px;border-top:1px solid var(--border);gap:6px}
+  .h-right.open{display:flex}
+  select,.btn{width:100%;font-size:13px;padding:9px 12px;border-radius:10px}
+
+  /* Main */
+  main{padding:10px 8px;gap:10px}
+
+  /* Sección día */
+  .sec-header{flex-wrap:wrap;gap:6px}
+  .sec-title{font-size:11px;padding:4px 10px}
+  .day-nav{margin-left:0;width:100%;justify-content:space-between;margin-top:4px}
+  .day-btn{font-size:12px;padding:6px 14px;border-radius:8px}
+  #day-label{font-size:12px;padding:6px 14px}
+
+  /* KPIs 2 columnas */
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .kpi{padding:12px 10px 10px}
+  .kpi-label{font-size:8px;letter-spacing:2px}
+  .kpi-value{font-size:16px!important;margin-top:4px}
+  .kpi-sub{font-size:10px}
+
+  /* Cards */
+  .card{padding:12px 10px}
+  .card-title{font-size:9px;margin-bottom:10px}
+
+  /* Grids — apila todo */
+  .g2,.g3{grid-template-columns:1fr!important;gap:10px}
+
+  /* Tablas org — solo canal y valor */
+  table{font-size:11px}
+  th,td{padding:6px 7px}
+  .org-bar{display:none}
+  /* Ocultar kilos y facts en tablas org en móvil */
+  #org-mxn-body td:nth-child(2),#org-mxn-body td:nth-child(4),
+  #org-usd-body td:nth-child(2),#org-usd-body td:nth-child(4),
+  #org-mxn-foot td:nth-child(2),#org-mxn-foot td:nth-child(4),
+  #org-usd-foot td:nth-child(2),#org-usd-foot td:nth-child(4),
+  table thead th:nth-child(2),table thead th:nth-child(4){display:none}
+
+  /* Gráfica más compacta */
+  .cbox{height:180px}.cbox canvas{max-height:180px}
+  .cbox-sm{height:150px}.cbox-sm canvas{max-height:150px}
+
+  /* Tabla líneas — columnas esenciales */
+  .hide-m{display:none!important}
+
+  /* KPI mini dentro de la gráfica */
+  #chart-mxn-total,#chart-usd-total{font-size:14px!important}
+
+  /* Período */
+  .sec-divider::after{font-size:8px;letter-spacing:1px}
+}
 </style>
 </head>
 <body>
@@ -450,9 +511,22 @@ function applyFilters(){
     return true;
   });
 
-  // Día activo
+  // Día activo = siempre ayer (día anterior a hoy)
   if(filteredDates.length){
-    var idx = filteredDates.indexOf(D.diaActivo);
+    // Calcular ayer
+    var hoy = new Date();
+    var ayer = new Date(hoy); ayer.setDate(hoy.getDate()-1);
+    var ayerStr = ayer.getFullYear()+'-'+
+      String(ayer.getMonth()+1).padStart(2,'0')+'-'+
+      String(ayer.getDate()).padStart(2,'0');
+    // Buscar ayer en filteredDates; si no existe, tomar el más cercano anterior
+    var idx = filteredDates.indexOf(ayerStr);
+    if(idx < 0){
+      // Buscar el último día <= ayer
+      for(var i=filteredDates.length-1;i>=0;i--){
+        if(filteredDates[i]<=ayerStr){idx=i;break;}
+      }
+    }
     activeDayIdx = idx>=0 ? idx : filteredDates.length-1;
   }
 
@@ -513,7 +587,7 @@ function renderDay(){
 
 // ── ORG TABLE ──
 function renderOrgTable(bodyId, footId, org, fmtFn){
-  var rows = (org&&org.rows)||[];
+  var rows = ((org&&org.rows)||[]).filter(function(e){ return e.org !== 'Northamerican Coffee'; });
   if(!rows.length){
     $(bodyId).innerHTML='<tr><td colspan="5" class="no-data">Sin registros</td></tr>';
     $(footId).innerHTML=''; return;
@@ -540,6 +614,8 @@ function renderCanalChart(orgMXN, orgUSD){
     if(all[r.org]) all[r.org].usd=r.netwr; else all[r.org]={mxn:0,usd:r.netwr};
     totalUSD+=r.netwr;
   });
+  // Excluir Northamerican Coffee de la gráfica de canales
+  delete all['Northamerican Coffee'];
   labels = Object.keys(all).sort(function(a,b){return (all[b].mxn+all[b].usd)-(all[a].mxn+all[a].usd);});
   dataMXN = labels.map(function(k){return all[k].mxn;});
   dataUSD = labels.map(function(k){return all[k].usd;});
