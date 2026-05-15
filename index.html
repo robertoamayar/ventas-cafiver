@@ -302,23 +302,42 @@ var filteredDates = [];
 
 // ── CARGA ──
 setBar(10,'Conectando con servidor...');
-fetch(APPS_SCRIPT_URL, {redirect:'follow'})
-  .then(function(r){
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    setBar(50,'Recibiendo datos...');
-    return r.text();
-  })
-  .then(function(txt){
-    setBar(80,'Procesando datos...');
-    var json = JSON.parse(txt);
+
+// JSONP — evita bloqueo CORS de Apps Script
+function cargarConJSONP() {
+  var callbackName = 'cafiver_cb_' + Date.now();
+  var script = document.createElement('script');
+  var timeout = setTimeout(function(){
+    cleanup();
+    $('ld-error').textContent = 'Tiempo de espera agotado. Verifica tu conexión.';
+    setBar(0,'Error de conexión');
+  }, 30000);
+
+  function cleanup(){
+    clearTimeout(timeout);
+    delete window[callbackName];
+    if(script.parentNode) script.parentNode.removeChild(script);
+  }
+
+  window[callbackName] = function(json){
+    cleanup();
+    setBar(85,'Preparando dashboard...');
     D = json;
     setTimeout(initDashboard, 80);
-  })
-  .catch(function(err){
-    console.error(err);
-    $('ld-error').textContent = 'Error al cargar datos. Verifica tu conexión e intenta de nuevo. ('+err.message+')';
+  };
+
+  script.onerror = function(){
+    cleanup();
+    $('ld-error').textContent = 'Error al cargar datos. Verifica tu conexión.';
     setBar(0,'Error de conexión');
-  });
+  };
+
+  setBar(30,'Descargando datos...');
+  script.src = APPS_SCRIPT_URL + '?callback=' + callbackName;
+  document.head.appendChild(script);
+}
+
+cargarConJSONP();
 
 // ── INIT ──
 function initDashboard(){
