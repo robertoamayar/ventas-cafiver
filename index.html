@@ -136,81 +136,6 @@ main{padding:20px 28px;display:flex;flex-direction:column;gap:18px;max-width:170
 .g3{display:grid;grid-template-columns:2fr 1fr;gap:16px}
 @media(max-width:900px){.g2,.g3{grid-template-columns:1fr}}
 
-/* ── MOBILE RESPONSIVE ── */
-@media(max-width:640px){
-  /* Header mobile */
-  header{padding:10px 14px;gap:8px;min-height:56px}
-  .h-logo{width:38px;height:38px}
-  .h-title{font-size:13px;letter-spacing:1px}
-  .h-badge{font-size:9px;padding:2px 8px}
-  .h-right{display:none;flex-direction:column;gap:8px;width:100%;padding-top:8px;border-top:1px solid var(--border)}
-  .h-right.open{display:flex}
-  .h-filter-toggle{display:flex!important}
-  select,input[type="date"],.btn{width:100%;font-size:13px;padding:8px 12px}
-  .fl{flex-wrap:wrap;gap:6px}
-  .fl input[type="date"]{flex:1;min-width:0}
-
-  /* Main padding */
-  main{padding:14px 12px;gap:14px}
-
-  /* KPIs — 2 columnas en móvil */
-  .kpi-grid-5{grid-template-columns:1fr 1fr}
-  .kpi{padding:13px 12px}
-  .kpi-value{font-size:18px!important}
-  .kpi-sub{font-size:10px}
-
-  /* Cards */
-  .card{padding:14px 12px}
-  .card-title{font-size:9px;margin-bottom:10px}
-
-  /* Day nav */
-  .sec-header{gap:8px}
-  .sec-title{font-size:11px;padding:4px 12px}
-  .day-nav{margin-left:0;width:100%;justify-content:space-between}
-  .day-btn{font-size:12px;padding:5px 10px}
-  #day-label{font-size:11px;padding:4px 10px}
-
-  /* g3 — apila en móvil */
-  .g3{grid-template-columns:1fr}
-
-  /* Tabla org — oculta columna % en móvil */
-  .org-bar{display:none}
-  .hide-mobile{display:none!important}
-
-  /* Tabla líneas — simplifica columnas */
-  #tbl-day-body td:nth-child(2),
-  #tbl-day-body td:nth-child(6),
-  #tbl-day-body td:nth-child(7),
-  #tbl-day-head th:nth-child(2),
-  #tbl-day-head th:nth-child(6),
-  #tbl-day-head th:nth-child(7){display:none}
-
-  /* Chart height menor */
-  .cbox{height:200px}.cbox canvas{max-height:200px}
-  .cbox-sm{height:160px}.cbox-sm canvas{max-height:160px}
-
-  /* Periodo section */
-  .g2{grid-template-columns:1fr}
-
-  /* Divider */
-  .sec-divider::after{font-size:8px;letter-spacing:2px}
-
-  /* Upload screen */
-  .drop-zone{padding:36px 20px}
-  .upload-logo{width:80px;height:80px}
-  .upload-title{font-size:22px}
-}
-
-/* ── MOBILE FILTER TOGGLE BUTTON ── */
-.h-filter-toggle{
-  display:none;
-  background:var(--surf2);border:1px solid var(--border);color:var(--green);
-  border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;
-  align-items:center;gap:6px;white-space:nowrap;font-family:'DM Sans',sans-serif;
-}
-.h-filter-toggle svg{width:14px;height:14px;flex-shrink:0}
-@media(max-width:640px){.h-filter-toggle{display:flex}}
-
 /* Charts */
 .cbox{position:relative;height:260px}.cbox canvas{max-height:260px}
 .cbox-sm{position:relative;height:200px}.cbox-sm canvas{max-height:200px}
@@ -283,12 +208,12 @@ tfoot td:first-child{text-align:left;font-size:10px;text-transform:uppercase;let
   </div>
   <div id="auto-status" style="text-align:center;max-width:380px;position:relative;z-index:1">
     <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)" id="auto-msg">Conectando con Google Drive...</div>
-    <div style="margin:12px auto 0;height:3px;background:var(--border);border-radius:2px;width:280px;overflow:hidden">
-      <div id="auto-bar" style="height:100%;background:var(--green);border-radius:2px;width:0%;transition:width .4s"></div>
+    <div style="margin:14px auto 0;height:3px;background:var(--border);border-radius:2px;width:280px;overflow:hidden">
+      <div id="auto-bar" style="height:100%;background:var(--green);border-radius:2px;width:0%;transition:width .5s"></div>
     </div>
-    <div style="margin-top:16px;font-size:11px;color:var(--muted)" id="auto-fallback"></div>
+    <div style="margin-top:16px;font-size:11px;color:var(--muted);line-height:1.6" id="auto-fallback"></div>
   </div>
-  <!-- Fallback carga manual (oculto por defecto) -->
+  <!-- Fallback carga manual -->
   <div class="drop-zone" id="drop-zone" style="display:none;position:relative;z-index:1">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
@@ -316,13 +241,7 @@ tfoot td:first-child{text-align:left;font-size:10px;text-transform:uppercase;let
         <span class="h-badge" id="h-rows">—</span>
       </div>
     </div>
-    <button class="h-filter-toggle" id="btn-filter-toggle">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M4 6h16M7 12h10M10 18h4"/>
-      </svg>
-      Filtros
-    </button>
-    <div class="h-right" id="h-right-panel">
+    <div class="h-right">
       <select id="sel-channel"><option value="">Todos los canales</option></select>
       <select id="sel-division"><option value="">Todas las divisiones</option></select>
       <select id="sel-month"><option value="">Todos los meses</option></select>
@@ -379,69 +298,46 @@ tfoot td:first-child{text-align:left;font-size:10px;text-transform:uppercase;let
       </div>
     </div>
 
-    <!-- Tablas org + Gráfica del día -->
-    <div class="g3">
-      <!-- Izquierda: MXN arriba, USD abajo -->
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="card">
-          <div class="card-title">
-            Organización de Ventas
-            <span class="currency-tag tag-mxn">MXN</span>
-            <span class="ct-green" id="org-mxn-date"></span>
-          </div>
-          <div class="tw">
-            <table>
-              <thead><tr>
-                <th style="width:34%">Canal</th>
-                <th style="text-align:right">Kilos</th>
-                <th style="text-align:right">Valor Neto</th>
-                <th style="text-align:right">Facts.</th>
-                <th style="min-width:110px;text-align:right">%</th>
-              </tr></thead>
-              <tbody id="org-mxn-body"></tbody>
-              <tfoot id="org-mxn-foot"></tfoot>
-            </table>
-          </div>
+    <!-- Tablas org MXN + USD -->
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">
+          Organización de Ventas
+          <span class="currency-tag tag-mxn">MXN</span>
+          <span class="ct-green" id="org-mxn-date"></span>
         </div>
-        <div class="card">
-          <div class="card-title">
-            Organización de Ventas
-            <span class="currency-tag tag-usd">USD</span>
-            <span class="ct-green" id="org-usd-date"></span>
-          </div>
-          <div class="tw">
-            <table>
-              <thead><tr>
-                <th style="width:34%">Canal</th>
-                <th style="text-align:right">Kilos</th>
-                <th style="text-align:right">Valor Neto</th>
-                <th style="text-align:right">Facts.</th>
-                <th style="min-width:110px;text-align:right">%</th>
-              </tr></thead>
-              <tbody id="org-usd-body"></tbody>
-              <tfoot id="org-usd-foot"></tfoot>
-            </table>
-          </div>
+        <div class="tw">
+          <table>
+            <thead><tr>
+              <th style="width:34%">Canal</th>
+              <th style="text-align:right">Kilos</th>
+              <th style="text-align:right">Valor Neto</th>
+              <th style="text-align:right">Facts.</th>
+              <th style="min-width:110px;text-align:right">%</th>
+            </tr></thead>
+            <tbody id="org-mxn-body"></tbody>
+            <tfoot id="org-mxn-foot"></tfoot>
+          </table>
         </div>
       </div>
-      <!-- Derecha: Gráfica profesional por canal -->
-      <div class="card" style="display:flex;flex-direction:column">
+      <div class="card">
         <div class="card-title">
-          Ventas por Canal del Día
-          <span class="ct-green" id="chart-day-date"></span>
+          Organización de Ventas
+          <span class="currency-tag tag-usd">USD</span>
+          <span class="ct-green" id="org-usd-date"></span>
         </div>
-        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-          <div style="flex:1;background:var(--green3);border:1px solid #c8e0bc;border-radius:10px;padding:12px 14px;min-width:100px">
-            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600">Total MXN</div>
-            <div id="chart-day-mxn-total" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--green);margin-top:4px">—</div>
-          </div>
-          <div style="flex:1;background:#edf7f5;border:1px solid #b8e0d8;border-radius:10px;padding:12px 14px;min-width:100px">
-            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600">Total USD</div>
-            <div id="chart-day-usd-total" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#20a090;margin-top:4px">—</div>
-          </div>
-        </div>
-        <div style="flex:1;position:relative;min-height:260px">
-          <canvas id="chart-day-canal"></canvas>
+        <div class="tw">
+          <table>
+            <thead><tr>
+              <th style="width:34%">Canal</th>
+              <th style="text-align:right">Kilos</th>
+              <th style="text-align:right">Valor Neto</th>
+              <th style="text-align:right">Facts.</th>
+              <th style="min-width:110px;text-align:right">%</th>
+            </tr></thead>
+            <tbody id="org-usd-body"></tbody>
+            <tfoot id="org-usd-foot"></tfoot>
+          </table>
         </div>
       </div>
     </div>
@@ -449,16 +345,15 @@ tfoot td:first-child{text-align:left;font-size:10px;text-transform:uppercase;let
     <!-- Líneas del día -->
     <div class="card">
       <div class="card-title">
-        Detalle de Líneas
+        Todas las Líneas del Día
         <span class="ct-green" id="day-lines-count"></span>
-        <span id="day-lines-hint" style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:auto">Selecciona un canal para ver el detalle</span>
       </div>
       <div class="tw h420">
         <table>
-          <thead id="tbl-day-head"><tr>
+          <thead><tr>
             <th>#</th><th>Fecha</th><th>Factura</th><th>Cliente</th>
-            <th class="hide-mobile">Oficina</th><th>Producto</th>
-            <th class="hide-mobile">Cant.</th><th class="hide-mobile">Kilos</th><th style="text-align:right">Importe</th>
+            <th>Canal</th><th>Oficina</th><th>División</th><th>Producto</th>
+            <th>Cant.</th><th>Kilos</th><th style="text-align:right">Importe</th>
           </tr></thead>
           <tbody id="tbl-day-body"></tbody>
         </table>
@@ -592,63 +487,69 @@ document.addEventListener('DOMContentLoaded', function () {
   function agg(rows,key){var m={};rows.forEach(function(r){var k=r[key]||'(sin)';m[k]=(m[k]||0)+r.netwr;});return Object.keys(m).map(function(k){return[k,m[k]];}).sort(function(a,b){return b[1]-a[1];});}
   function hasFilter(){return !!($('sel-channel').value||$('sel-division').value||$('sel-month').value||$('date-from').value||$('date-to').value);}
 
-  // ── AUTO-CARGA DESDE GOOGLE DRIVE ──
-  var SHEET_CSV = 'https://docs.google.com/spreadsheets/d/1CF6n8nX_LTMMA3bU3jGgkvFbI7fxMVhd8DUFounEUeE/export?format=csv&gid=1901466973';
+  // ── URL DEL APPS SCRIPT — REEMPLAZA CON LA TUYA ──
+  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymPNbuwbS5LZ_9USRr9u9ywRq2ocVDcZ9P723S7_EB-KRf6prccUXn6Fidi2ypOAED/exec';
 
-  function setAutoMsg(msg, pct) {
+  function setProgress(msg, pct) {
     var el = $('auto-msg'); if(el) el.textContent = msg;
     var bar = $('auto-bar'); if(bar) bar.style.width = (pct||0)+'%';
   }
 
+  function showFallback(msg) {
+    var fb = $('auto-fallback');
+    if(fb) fb.innerHTML = msg || '';
+    var dz = $('drop-zone');
+    if(dz) dz.style.display = '';
+  }
+
   function autoLoadFromDrive() {
-    setAutoMsg('Descargando reporte SAP...', 20);
-    // Usamos un proxy CORS para evitar bloqueo del navegador
-    var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(SHEET_CSV);
-    fetch(proxyUrl)
+    if (APPS_SCRIPT_URL === 'PEGAR_URL_APPS_SCRIPT_AQUI') {
+      setProgress('Sin URL configurada', 0);
+      showFallback('Configura la URL del Apps Script en el dashboard.<br>Por ahora carga el archivo manualmente:');
+      return;
+    }
+    setProgress('Descargando reporte SAP...', 15);
+    fetch(APPS_SCRIPT_URL)
       .then(function(res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        setAutoMsg('Leyendo datos...', 60);
+        setProgress('Leyendo datos...', 50);
         return res.text();
       })
       .then(function(csvText) {
-        setAutoMsg('Procesando registros...', 80);
-        setTimeout(function() { parseCSVText(csvText); }, 100);
+        if (!csvText || csvText.trim().length < 10) throw new Error('Respuesta vacía');
+        setProgress('Procesando registros...', 80);
+        setTimeout(function() { parseCSVText(csvText); }, 80);
       })
       .catch(function(err) {
-        console.warn('Drive auto-load failed:', err);
-        // Fallback: mostrar carga manual
-        setAutoMsg('No se pudo conectar automáticamente.', 0);
-        var fb = $('auto-fallback');
-        if(fb) fb.innerHTML = 'Carga el archivo manualmente:';
-        var dz = $('drop-zone');
-        if(dz) dz.style.display = '';
+        console.warn('Auto-load error:', err);
+        setProgress('No se pudo cargar automáticamente', 0);
+        showFallback('Carga el archivo manualmente mientras configuras el script:');
       });
   }
 
-  // Carga manual (fallback)
-  var dz=$('drop-zone'),fi=$('file-input');
-  if(dz) dz.addEventListener('click',function(){fi.click();});
-  if(dz) dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('over');});
-  if(dz) dz.addEventListener('dragleave',function(){dz.classList.remove('over');});
-  if(dz) dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0]);});
-  if(fi) fi.addEventListener('change',function(){if(fi.files[0])loadFile(fi.files[0]);});
-
-  // Arrancar auto-carga
-  autoLoadFromDrive();
-
   function parseCSVText(csvText) {
-    $('upload-screen').style.display='none';
-    $('loader').style.display='flex';
-    $('load-msg').textContent='Procesando datos SAP…';
-    // Google Sheets exporta con coma, detectar delimitador
-    var firstLine = csvText.split('\n')[0]||'';
+    $('upload-screen').style.display = 'none';
+    $('loader').style.display = 'flex';
+    $('load-msg').textContent = 'Procesando datos SAP…';
+    var firstLine = csvText.split('\n')[0] || '';
     var delim = firstLine.indexOf(';') > -1 ? ';' : ',';
-    Papa.parse(csvText,{
-      delimiter:delim,header:true,skipEmptyLines:true,
-      complete:function(res){ processRows(res); },
-      error:function(){ alert('Error al procesar el CSV.'); location.reload(); }
+    Papa.parse(csvText, {
+      delimiter: delim, header: true, skipEmptyLines: true,
+      complete: function(res) { processRows(res); },
+      error: function() { alert('Error al procesar datos.'); location.reload(); }
     });
   }
+
+  // Carga manual (fallback)
+  var dz=$('drop-zone'), fi=$('file-input');
+  if(dz) { dz.addEventListener('click',function(){if(fi)fi.click();}); }
+  if(dz) { dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('over');}); }
+  if(dz) { dz.addEventListener('dragleave',function(){dz.classList.remove('over');}); }
+  if(dz) { dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0]);}); }
+  if(fi) { fi.addEventListener('change',function(){if(fi.files[0])loadFile(fi.files[0]);}); }
+
+  // Arrancar carga automática
+  autoLoadFromDrive();
 
   function loadFile(file){
     $('upload-screen').style.display='none';
@@ -657,15 +558,15 @@ document.addEventListener('DOMContentLoaded', function () {
     Papa.parse(file,{
       delimiter:';',header:true,skipEmptyLines:true,
       complete:function(res){ processRows(res); },
+  }
+
   function processRows(res){
         $('load-msg').textContent='Procesando '+res.data.length.toLocaleString('es-MX')+' registros…';
         setTimeout(function(){
           allRows=res.data.map(function(r){
             return{
               kunag:(r.KUNAG||''),
-              kunnr:(r.KUNNR||'').trim(),
               clienteNombre:(r.TEXT_VBRK_KUNAG||r.SORT1||'').trim(),
-              clienteLikp:(r.TEXT_LIKP_KUNNR||'').trim(),
               fecha:r.FKDAT||'',
               mes:r.FKDAT?+r.FKDAT.split('-')[1]:null,
               netwr:parseFloat(r.NETWR)||0,
@@ -684,9 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
           });
           var seen={};allDates=[];
-          var hoy=yesterday(); // usamos ayer como tope máximo de fechas válidas
-          // Filtrar fechas futuras: solo incluir días <= ayer
-          allRows.forEach(function(r){if(r.fecha&&r.fecha<=hoy&&!seen[r.fecha]){seen[r.fecha]=true;allDates.push(r.fecha);}});
+          allRows.forEach(function(r){if(r.fecha&&!seen[r.fecha]){seen[r.fecha]=true;allDates.push(r.fecha);}});
           allDates.sort();
           populateFilters();
           $('loader').style.display='none';
@@ -700,8 +599,6 @@ document.addEventListener('DOMContentLoaded', function () {
             idx=allDates.indexOf(best);
           }
           activeDayIdx=Math.max(0,idx);
-          // Excluir filas con fecha futura
-          allRows=allRows.filter(function(r){ return !r.fecha || r.fecha<=hoy; });
           filtered=allRows;
           refresh();
         },60);
@@ -756,10 +653,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ['dk-total','dk-fact','dk-cli','dk-ticket','dk-kilos'].forEach(function(id){$(id).textContent='—';});
       ['org-mxn-body','org-usd-body'].forEach(function(id){$(id).innerHTML='<tr><td colspan="5" class="no-data">Sin registros</td></tr>';});
       ['org-mxn-foot','org-usd-foot'].forEach(function(id){$(id).innerHTML='';});
-      if(charts['chart-day-canal']){charts['chart-day-canal'].destroy();delete charts['chart-day-canal'];}
-      $('chart-day-mxn-total').textContent='—';$('chart-day-usd-total').textContent='—';
-      $('day-lines-count').textContent='';
-      $('tbl-day-body').innerHTML='<tr><td colspan="9" class="no-data" style="padding:40px;color:var(--muted)">⬆ Selecciona un canal para ver el detalle de líneas</td></tr>';
+      $('tbl-day-body').innerHTML='<tr><td colspan="11" class="no-data">Sin registros</td></tr>';
       return;
     }
     activeDayIdx=Math.max(0,Math.min(activeDayIdx,dates.length-1));
@@ -771,11 +665,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var dayRows=filtered.filter(function(r){return r.fecha===d;});
     renderDayKPIs(dayRows);
     $('org-mxn-date').textContent=fmtDate(d);$('org-usd-date').textContent=fmtDate(d);
-    var mxnRows=dayRows.filter(function(r){return r.waerk!=='USD';});
-    var usdRows=dayRows.filter(function(r){return r.waerk==='USD';});
-    renderOrgBlock(mxnRows,'org-mxn-body','org-mxn-foot',fmt);
-    renderOrgBlock(usdRows,'org-usd-body','org-usd-foot',fmtUSD);
-    renderDayChart(dayRows, d);
+    renderOrgBlock(dayRows.filter(function(r){return r.waerk!=='USD';}),'org-mxn-body','org-mxn-foot',fmt);
+    renderOrgBlock(dayRows.filter(function(r){return r.waerk==='USD';}),'org-usd-body','org-usd-foot',fmtUSD);
     renderDayLines(dayRows);
   }
 
@@ -811,144 +702,27 @@ document.addEventListener('DOMContentLoaded', function () {
     $(footId).innerHTML='<tr><td>Total</td><td>'+(totKilos>0?fmtN(totKilos):'—')+'</td><td>'+fmtFn(totNetwr)+'</td><td>'+totFacts+'</td><td></td></tr>';
   }
 
-  function renderDayChart(rows, fecha) {
-    $('chart-day-date').textContent = fmtDate(fecha);
-
-    // Agrupar por canal
-    var byCanal = {};
-    rows.forEach(function(r) {
-      var k = r.orgLabel || CH_LABEL[r.ch] || r.ch || '(sin)';
-      if (!byCanal[k]) byCanal[k] = {mxn:0, usd:0};
-      if (r.waerk === 'USD') byCanal[k].usd += r.netwr;
-      else byCanal[k].mxn += r.netwr;
-    });
-
-    var labels = Object.keys(byCanal).sort(function(a,b){
-      return (byCanal[b].mxn+byCanal[b].usd)-(byCanal[a].mxn+byCanal[a].usd);
-    });
-    var dataMXN = labels.map(function(k){return byCanal[k].mxn;});
-    var dataUSD = labels.map(function(k){return byCanal[k].usd;});
-
-    var totalMXN = dataMXN.reduce(function(s,v){return s+v;},0);
-    var totalUSD = dataUSD.reduce(function(s,v){return s+v;},0);
-    $('chart-day-mxn-total').textContent = fmt(totalMXN);
-    $('chart-day-usd-total').textContent = totalUSD > 0 ? fmtUSD(totalUSD) : '$0 USD';
-
-    // Colores por canal
-    var CANAL_COLORS = {
-      'Anaquel':'#2d5a1b','Coffee Service':'#3b5bdb','Mercado Libre':'#c4a020',
-      'Tienda Virtual':'#c4714a','Tienda Tradicional':'#7a3fa0','Nichos':'#c4364a',
-      'CAFETERIA':'#5a8c2d','CAFETERIAS NUEVAS':'#4a7c8c','Tik Tok Shop':'#8c6b2d',
-      'Northamerican Coffee':'#20a090'
-    };
-    var bgColors = labels.map(function(k){return CANAL_COLORS[k]||'#8c6b2d';});
-    var bgColorsUSD = labels.map(function(k){
-      var c = CANAL_COLORS[k]||'#8c6b2d';
-      return c + '55'; // transparente para USD
-    });
-
-    var hasUSD = dataUSD.some(function(v){return v>0;});
-
-    var datasets = [{
-      label: 'MXN',
-      data: dataMXN,
-      backgroundColor: bgColors,
-      borderRadius: {topRight:6,bottomRight:6},
-      borderSkipped: false,
-      barPercentage: 0.72,
-    }];
-    if (hasUSD) {
-      datasets.push({
-        label: 'USD',
-        data: dataUSD,
-        backgroundColor: bgColorsUSD,
-        borderWidth: 2,
-        borderColor: bgColors,
-        borderRadius: {topRight:6,bottomRight:6},
-        borderSkipped: false,
-        barPercentage: 0.72,
-      });
-    }
-
-    mkChart('chart-day-canal', {
-      type: 'bar',
-      data: { labels: labels, datasets: datasets },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: hasUSD,
-            position: 'top',
-            labels: { color:'#9a8060', font:{size:10}, boxWidth:10, padding:10 }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(ctx) {
-                var v = ctx.raw;
-                if (!v) return null;
-                return ' ' + ctx.dataset.label + ': ' + (ctx.dataset.label==='USD'?fmtUSD(v):fmt(v));
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            stacked: false,
-            ticks: {
-              color:'#9a8060', font:{size:10},
-              callback: function(v){ return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v; }
-            },
-            grid: { color:'#ece4d4' },
-            border: { display:false }
-          },
-          y: {
-            stacked: false,
-            ticks: { color:'#5a4a30', font:{size:11,weight:'600'} },
-            grid: { display:false },
-            border: { display:false }
-          }
-        }
-      }
-    });
-  }
-
   function renderDayLines(rows){
-    var ch = $('sel-channel').value;
-    var hint = $('day-lines-hint');
-
-    // Sin canal seleccionado: tabla vacía con mensaje
-    if (!ch) {
-      $('day-lines-count').textContent = '';
-      if (hint) hint.style.display = '';
-      $('tbl-day-body').innerHTML =
-        '<tr><td colspan="9" class="no-data" style="padding:40px;color:var(--muted)">'+
-        '⬆ Selecciona un canal en los filtros para ver el detalle de líneas</td></tr>';
-      return;
-    }
-
-    if (hint) hint.style.display = 'none';
-    $('day-lines-count').textContent = rows.length.toLocaleString('es-MX')+' líneas';
-    if (!rows.length) {
-      $('tbl-day-body').innerHTML='<tr><td colspan="9" class="no-data">Sin registros para este día / canal</td></tr>';
-      return;
-    }
-
+    $('day-lines-count').textContent=rows.length.toLocaleString('es-MX')+' líneas';
+    if(!rows.length){$('tbl-day-body').innerHTML='<tr><td colspan="11" class="no-data">Sin registros para este día</td></tr>';return;}
     var fc={},ci=0,FC=['#f0f8ec','#fff8f0','#f0f4ff','#fff5f3','#f5f0ff'];
     $('tbl-day-body').innerHTML=rows.map(function(r,i){
       if(!fc[r.vbeln]){fc[r.vbeln]=FC[ci%FC.length];ci++;}
+      var cl=CH_CLASS[r.ch]||'ch-OTHER';
+      var lbl=r.orgLabel||CH_LABEL[r.ch]||r.ch||'—';
       var cant=r.fkimg>0?r.fkimg.toLocaleString('es-MX',{maximumFractionDigits:3})+' '+r.vrkme:'—';
       var imp=r.waerk==='USD'?fmtUSD(r.netwr):fmt(r.netwr);
       return '<tr style="background:'+fc[r.vbeln]+'">'+
         '<td class="rk">'+(i+1)+'</td>'+
         '<td class="num" style="color:var(--muted)">'+r.fecha+'</td>'+
         '<td class="num" style="color:var(--acc5)">'+r.vbeln+'</td>'+
-        '<td class="trunc" title="'+(r.clienteLikp||r.kunnr||r.clienteNombre)+'">'+(r.clienteLikp||r.kunnr||r.clienteNombre||r.kunag)+'</td>'+
-        '<td class="hide-mobile trunc" style="color:var(--muted);font-size:11px;max-width:140px">'+(r.vkburNombre||r.vkbur||'—')+'</td>'+
-        '<td class="trunc" title="'+r.producto+'" style="max-width:200px">'+(r.producto||r.matnr)+'</td>'+
-        '<td class="num hide-mobile">'+cant+'</td>'+
-        '<td class="num hide-mobile" style="color:var(--muted)">'+(r.kilos>0?r.kilos.toFixed(2)+' kg':'—')+'</td>'+
+        '<td class="trunc" title="'+r.clienteNombre+'">'+(r.clienteNombre||r.kunag)+'</td>'+
+        '<td><span class="tag-canal '+cl+'">'+lbl+'</span></td>'+
+        '<td style="color:var(--muted);font-size:11px">'+(r.vkburNombre||r.vkbur||'—')+'</td>'+
+        '<td style="color:var(--muted);font-size:11px">'+(r.spartNombre||'—')+'</td>'+
+        '<td class="trunc" title="'+r.producto+'" style="max-width:180px">'+(r.producto||r.matnr)+'</td>'+
+        '<td class="num">'+cant+'</td>'+
+        '<td class="num" style="color:var(--muted)">'+(r.kilos>0?r.kilos.toFixed(2)+' kg':'—')+'</td>'+
         '<td class="num" style="color:var(--green);font-weight:600">'+imp+'</td>'+
       '</tr>';
     }).join('');
@@ -1037,18 +811,6 @@ document.addEventListener('DOMContentLoaded', function () {
     };
   }
   function mkChart(id,cfg){if(charts[id]){charts[id].destroy();delete charts[id];}charts[id]=new Chart(document.getElementById(id).getContext('2d'),cfg);}
-
-  // Toggle filtros en móvil
-  var btnToggle = $('btn-filter-toggle');
-  var hPanel    = $('h-right-panel');
-  if (btnToggle && hPanel) {
-    btnToggle.addEventListener('click', function() {
-      hPanel.classList.toggle('open');
-      var isOpen = hPanel.classList.contains('open');
-      btnToggle.style.color = isOpen ? 'var(--green)' : '';
-      btnToggle.style.borderColor = isOpen ? 'var(--green)' : '';
-    });
-  }
 
 }); // DOMContentLoaded
 </script>
