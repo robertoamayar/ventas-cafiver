@@ -376,7 +376,7 @@ tfoot tr:last-child:hover td{background:#e8f5e0!important}
 
 <script>
 (function(){
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_ox_VwygJ3nG2UvR-P8fYUHoL8eFJcvG5Urj6JFf3_OIRvLLXay68cAnzHUBwhZTm/exec';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6kmaHqQFTSyZnKyu_0h6Uc9cx_O0wItCFDbxvDFpzQPyTbPyQilTk4tJITmcfNllZ/exec';
 var MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 var PALETTE = ['#2d5a1b','#5a8c2d','#8c6b2d','#c4714a','#4a7c8c','#7a3fa0','#c4a020','#3b5bdb','#c4364a','#20a090'];
 
@@ -1045,9 +1045,11 @@ function calcKPIsPeriodo(ch, mon){
     var THEAD = '<thead><tr>'+
       '<th style="min-width:140px">Línea</th>'+
       '<th style="text-align:right">KG Real</th>'+
+      '<th style="text-align:right">KG Proyect.</th>'+
       '<th style="text-align:right">KG Presup.</th>'+
       '<th style="text-align:right">% KG</th>'+
       '<th style="text-align:right">Ventas Real</th>'+
+      '<th style="text-align:right">Ventas Proyect.</th>'+
       '<th style="text-align:right">Ventas Presup.</th>'+
       '<th style="text-align:right">% Ventas</th>'+
       '<th style="text-align:right">UAI Presup.</th>'+
@@ -1065,12 +1067,20 @@ function calcKPIsPeriodo(ch, mon){
         var bg  = isT ? 'background:var(--green)' : '';
         var tc  = isT ? '#fff' : 'var(--green)';
         var mc  = isT ? '#d0ecc8' : 'var(--muted)';
+        var pK  = real[linea] ? real[linea].proyKG||0     : 0;
+        var pV  = real[linea] ? real[linea].proyVentas||0 : 0;
+        // Color proyectado: verde si supera presupuesto, naranja si >80%, rojo si <80%
+        var pcV = pm.ventas>0 ? pV/pm.ventas*100 : 0;
+        var pcK = pm.kg>0     ? pK/pm.kg*100     : 0;
+        var cpV = pcColor(pcV), cpK = pcColor(pcK);
         rows += '<tr style="'+bg+(isT?'':';border-bottom:1px solid var(--bg2)')+'">'+
           '<td style="padding:7px 10px;font-weight:'+(isT?700:600)+';color:'+(isT?'#fff':'var(--text)')+'">'+linea+'</td>'+
           '<td class="num" style="color:'+tc+';font-weight:'+(isT?700:400)+'">'+fmtN(rK)+'</td>'+
+          '<td class="num" style="color:'+(isT?'#d0ecc8':cpK)+';font-weight:600;font-style:italic">'+fmtN(pK)+'</td>'+
           '<td class="num" style="color:'+mc+'">'+fmtN(pm.kg)+'</td>'+
           '<td style="text-align:right;padding:7px 10px">'+pcBadge(rK,pm.kg,isT)+'</td>'+
           '<td class="num" style="color:'+tc+';font-weight:'+(isT?700:600)+'">'+fmt(rV)+'</td>'+
+          '<td class="num" style="color:'+(isT?'#d0ecc8':cpV)+';font-weight:700">'+fmt(pV)+'</td>'+
           '<td class="num" style="color:'+mc+'">'+fmt(pm.ventas)+'</td>'+
           '<td style="text-align:right;padding:7px 10px">'+pcBadge(rV,pm.ventas,isT)+'</td>'+
           '<td class="num" style="color:'+mc+'">'+fmt(pm.uai)+'</td>'+
